@@ -41,14 +41,14 @@ export class Modal extends Component {
     if (this.state.isVisible) {
       this.show();
     }
-    Dimensions.addListener(
+    Dimensions.addEventListener(
       "change",
       this.handleDimensionsUpdate
     );
   }
 
   componentWillUnmount() {
-    DeviceEventEmitter.removeListener(
+    DeviceEventEmitter.removeEventListener(
       "change",
       this.handleDimensionsUpdate
     );
