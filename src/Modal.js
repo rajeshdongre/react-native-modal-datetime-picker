@@ -41,15 +41,15 @@ export class Modal extends Component {
     if (this.state.isVisible) {
       this.show();
     }
-    DeviceEventEmitter.addListener(
-      "didUpdateDimensions",
+    Dimensions.addListener(
+      "change",
       this.handleDimensionsUpdate
     );
   }
 
   componentWillUnmount() {
     DeviceEventEmitter.removeListener(
-      "didUpdateDimensions",
+      "change",
       this.handleDimensionsUpdate
     );
     this._isMounted = false;
@@ -63,9 +63,9 @@ export class Modal extends Component {
     }
   }
 
-  handleDimensionsUpdate = (dimensionsUpdate) => {
-    const deviceWidth = dimensionsUpdate.window.width;
-    const deviceHeight = dimensionsUpdate.window.height;
+  handleDimensionsUpdate = (event) => {
+    const deviceWidth = event.window.width;
+    const deviceHeight = event.window.height;
     if (
       deviceWidth !== this.state.deviceWidth ||
       deviceHeight !== this.state.deviceHeight
