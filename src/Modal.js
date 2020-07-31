@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import {
   Animated,
-  DeviceEventEmitter,
   Dimensions,
   Easing,
   Modal as ReactNativeModal,
@@ -29,8 +28,7 @@ export class Modal extends Component {
 
   state = {
     isVisible: this.props.isVisible,
-    deviceWidth: Dimensions.get("window").width,
-    deviceHeight: Dimensions.get("window").height,
+    layoutHeight: Dimensions.get("screen").height
   };
 
   animVal = new Animated.Value(0);
@@ -41,17 +39,9 @@ export class Modal extends Component {
     if (this.state.isVisible) {
       this.show();
     }
-    Dimensions.addEventListener(
-      "change",
-      this.handleDimensionsUpdate
-    );
   }
 
   componentWillUnmount() {
-    DeviceEventEmitter.removeEventListener(
-      "change",
-      this.handleDimensionsUpdate
-    );
     this._isMounted = false;
   }
 
@@ -63,14 +53,10 @@ export class Modal extends Component {
     }
   }
 
-  handleDimensionsUpdate = (event) => {
-    const deviceWidth = event.window.width;
-    const deviceHeight = event.window.height;
-    if (
-      deviceWidth !== this.state.deviceWidth ||
-      deviceHeight !== this.state.deviceHeight
-    ) {
-      this.setState({ deviceWidth, deviceHeight });
+  onLayout = (event) => {
+    const layoutHeight = event.nativeEvent.layout.height;
+    if (layoutHeight !== this.state.layoutHeight) {
+      this.setState({ layoutHeight });
     }
   };
 
@@ -106,7 +92,7 @@ export class Modal extends Component {
       contentStyle,
       ...otherProps
     } = this.props;
-    const { deviceHeight, deviceWidth, isVisible } = this.state;
+    const { layoutHeight, isVisible } = this.state;
     const backdropAnimatedStyle = {
       opacity: this.animVal.interpolate({
         inputRange: [0, 1],
@@ -118,7 +104,7 @@ export class Modal extends Component {
         {
           translateY: this.animVal.interpolate({
             inputRange: [0, 1],
-            outputRange: [deviceHeight, 0],
+            outputRange: [layoutHeight, 0],
             extrapolate: "clamp",
           }),
         },
@@ -135,9 +121,9 @@ export class Modal extends Component {
           <Animated.View
             style={[
               styles.backdrop,
-              backdropAnimatedStyle,
-              { width: deviceWidth, height: deviceHeight },
+              backdropAnimatedStyle
             ]}
+            onLayout={this.onLayout}
           />
         </TouchableWithoutFeedback>
         {isVisible && (
@@ -154,13 +140,6 @@ export class Modal extends Component {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
   backdrop: {
     position: "absolute",
     top: 0,
